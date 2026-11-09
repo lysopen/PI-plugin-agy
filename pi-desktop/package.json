@@ -1,0 +1,8 @@
+{
+  "name": "pi-plugin-agy-desktop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/adapter-smoke.mjs"
+  }
+}

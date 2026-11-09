@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "lysopen.agy",
+  "name": "Antigravity ACP",
+  "version": "0.1.0",
+  "description": "Use the locally installed official agy ACP server as a PI-Desktop model provider.",
+  "author": "lysopen",
+  "homepage": "https://github.com/lysopen/PI-plugin-agy",
+  "repository": "https://github.com/lysopen/PI-plugin-agy",
+  "main": "main.cjs",
+  "contributes": {
+    "agentExtensions": ["agent-extension.mjs"]
+  },
+  "permissions": ["agent.extension"],
+  "engines": {
+    "piDesktop": ">=0.21.0"
+  },
+  "activationEvents": ["onStartup"],
+  "i18n": {
+    "en": {
+      "name": "Antigravity ACP",
+      "description": "Use the locally installed official agy ACP server as a PI-Desktop model provider.",
+      "safetyNotes": "Runs the official local agy binary and keeps credentials in the official CLI account store."
+    },
+    "zh-CN": {
+      "name": "Antigravity ACP",
+      "description": "把本机官方 agy ACP 服务接入 PI-Desktop，提供 Gemini、Claude 和 GPT-OSS 模型。",
+      "safetyNotes": "只启动本机官方 agy；登录态仍由官方 CLI 管理。"
+    }
+  }
+}
