@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test/adapter-smoke.mjs"
+    "test": "node test/adapter-smoke.mjs && node test/bridge-smoke.mjs"
   }
 }

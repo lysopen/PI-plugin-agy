@@ -2,18 +2,73 @@
   "schemaVersion": 1,
   "id": "lysopen.agy",
   "name": "Antigravity ACP",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Use the locally installed official agy ACP server as a PI-Desktop model provider.",
   "author": "lysopen",
   "homepage": "https://github.com/lysopen/PI-plugin-agy",
   "repository": "https://github.com/lysopen/PI-plugin-agy",
   "main": "main.cjs",
   "contributes": {
-    "agentExtensions": ["agent-extension.mjs"]
+    "agentExtensions": ["agent-extension.mjs"],
+    "providers": [
+      {
+        "id": "antigravity",
+        "name": "Antigravity ACP",
+        "vendorKey": "antigravity",
+        "baseUrl": "http://127.0.0.1:17956/v1",
+        "apiStyle": "chat_completions",
+        "authKind": "none",
+        "models": [
+          {
+            "id": "gemini-4-argon",
+            "name": "Gemini 4 Argon",
+            "contextWindow": 256000,
+            "maxTokens": 8192,
+            "thinkingLevels": ["low", "medium", "high"],
+            "defaultThinkingLevel": "high"
+          },
+          {
+            "id": "gemini-3.8-flash",
+            "name": "Gemini 3.8 Flash",
+            "contextWindow": 256000,
+            "maxTokens": 8192,
+            "thinkingLevels": ["low", "medium", "high"],
+            "defaultThinkingLevel": "high"
+          },
+          {
+            "id": "claude-opus-5-5",
+            "name": "Claude Opus 5.5",
+            "contextWindow": 256000,
+            "maxTokens": 8192,
+            "thinkingLevels": ["low", "medium", "high"],
+            "defaultThinkingLevel": "high"
+          },
+          {
+            "id": "claude-sonnet-5-5",
+            "name": "Claude Sonnet 5.5",
+            "contextWindow": 256000,
+            "maxTokens": 8192,
+            "thinkingLevels": ["low", "medium", "high"],
+            "defaultThinkingLevel": "high"
+          },
+          {
+            "id": "gpt-oss-120b-medium",
+            "name": "GPT-OSS 120B (Medium)",
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "thinkingLevels": ["medium"],
+            "defaultThinkingLevel": "medium"
+          }
+        ]
+      }
+    ],
+    "services": [
+      { "id": "antigravity-bridge", "label": "Antigravity OpenAI bridge" }
+    ]
   },
-  "permissions": ["agent.extension"],
+  "permissions": ["agent.extension", "provider.register", "background.service"],
   "engines": {
-    "piDesktop": ">=0.21.0"
+    "piDesktop": ">=0.22.0"
   },
   "activationEvents": ["onStartup"],
   "i18n": {

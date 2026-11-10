@@ -16,7 +16,11 @@ dsh plugin --profile web add "git+https://github.com/lili-luo/dsh-plugin-bundle.
 
 ## PI-Desktop
 
-`pi-desktop/` 是面向 [PI-Desktop](https://github.com/vastsa/pi-desktop) 的独立插件包，不会改动上面的 DSH 插件。它通过 `manifest.json` 的 `contributes.agentExtensions` 注册 `Antigravity ACP`，由本机官方 `agy acp` 提供 Gemini、Claude 和 GPT-OSS 模型。
+`pi-desktop/` 是面向 [PI-Desktop](https://github.com/vastsa/pi-desktop) 的独立插件包，不会改动上面的 DSH 插件。桌面端通过本机 OpenAI Chat Completions Bridge 调用官方 `agy acp`，提供 Gemini、Claude 和 GPT-OSS 模型。
+
+在 PI-Desktop 的插件页导入 `lysopen.agy-0.1.2.piplug`。已经配置过自定义端点的用户直接更新插件即可。PI-Desktop 0.22.0 首次安装后，请在插件页将 **Antigravity ACP** 关闭再开启一次，模型就会出现在聊天的模型列表。
+
+也可以手动接入：在 **设置 → 模型 → AI 服务 → 添加服务 → 自定义端点** 填入 `http://127.0.0.1:17956/v1`，选 **OpenAI Chat Completions**，API Key 留空，勾选模型并保存。
 
 在 PI-Desktop 的插件开发工具中检查或打包：
 

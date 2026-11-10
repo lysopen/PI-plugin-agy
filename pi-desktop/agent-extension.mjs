@@ -65,7 +65,7 @@ function parseAccounts() {
   }
 }
 
-function runtimeConfig() {
+export function runtimeConfig() {
   const visibleModels = (process.env.PI_AGY_VISIBLE_MODELS ?? "")
     .split(",")
     .map((value) => value.trim())
@@ -247,7 +247,7 @@ function toDshTool(tool) {
   };
 }
 
-function toDshOptions(model, context, options) {
+export function toDshOptions(model, context, options) {
   const system = typeof context?.systemPrompt === "string" ? context.systemPrompt : textOf(context?.systemPrompt ?? "");
   const messages = Array.isArray(context?.messages) ? context.messages.map(toDshMessage) : [];
   const tools = Array.isArray(context?.tools) ? context.tools.map(toDshTool).filter((tool) => tool.name.length > 0) : [];
@@ -318,9 +318,9 @@ export async function completeWithRuntime(runtime, model, context, options) {
     }
     const state = states.get(chunk.index);
     if (chunk.type === "text-delta") {
-      (state ?? states.set(chunk.index, { type: "text", text: "" }).get(chunk.index)).text += String(chunk.delta ?? "");
+      (state ?? states.set(chunk.index, { type: "text", text: "" }).get(chunk.index)).text += chunk.text;
     } else if (chunk.type === "reasoning-delta") {
-      (state ?? states.set(chunk.index, { type: "reasoning", text: "" }).get(chunk.index)).text += String(chunk.delta ?? "");
+      (state ?? states.set(chunk.index, { type: "reasoning", text: "" }).get(chunk.index)).text += chunk.text;
     } else if (chunk.type === "tool-call-delta") {
       const next = state ?? { type: "tool-call", text: "", id: "", name: "", arguments: "" };
       next.id = String(chunk.id ?? next.id);
@@ -363,7 +363,7 @@ export async function completeWithRuntime(runtime, model, context, options) {
   };
 }
 
-function modelsForDesktop() {
+export function modelsForDesktop() {
   const contextWindow = envInt("PI_AGY_CONTEXT_WINDOW", DEFAULT_CONTEXT_WINDOW, 32_000, 1_048_576);
   return MODEL_CATALOG.map(({ id, name }) => ({
     id,
@@ -377,9 +377,9 @@ function modelsForDesktop() {
   }));
 }
 
-export default function register(pi) {
-  const runtime = new AntigravityRuntime({
-    config: runtimeConfig(),
+export function createRuntime(overrides = {}) {
+  return new AntigravityRuntime({
+    config: overrides.config ?? runtimeConfig(),
     spawnAcp,
     runCommand,
     readImage: async () => undefined,
@@ -389,7 +389,12 @@ export default function register(pi) {
       warn: (message) => console.warn(`[agy] ${message}`),
     },
     onModelsChanged: () => {},
+    ...overrides,
   });
+}
+
+export default function register(pi) {
+  const runtime = createRuntime();
 
   pi.registerAgent({
     id: PROVIDER_ID,

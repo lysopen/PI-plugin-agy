@@ -23,9 +23,10 @@ const runtime = {
     seen = options;
     yield { type: "usage", usage: { inputTokens: 12, outputTokens: 7, totalTokens: 19 } };
     yield { type: "block-start", index: 0, blockType: "text" };
-    yield { type: "text-delta", index: 0, delta: "hello" };
+    yield { type: "text-delta", index: 0, text: "hel" };
+    yield { type: "text-delta", index: 0, text: "lo" };
     yield { type: "block-start", index: 1, blockType: "reasoning" };
-    yield { type: "reasoning-delta", index: 1, delta: "think" };
+    yield { type: "reasoning-delta", index: 1, text: "think" };
     yield { type: "block-start", index: 2, blockType: "tool-call" };
     yield {
       type: "tool-call-delta",
@@ -55,6 +56,8 @@ assert.equal(seen.sessionId, "s1");
 assert.equal(seen.messages[0].role, "user");
 assert.equal(seen.tools[0].name, "Read");
 assert.deepEqual(result.content.map((block) => block.type), ["text", "thinking", "toolCall"]);
+assert.equal(result.content[0].text, "hello");
+assert.equal(result.content[1].thinking, "think");
 assert.deepEqual(result.content[2].arguments, { path: "a.txt" });
 assert.equal(result.stopReason, "toolUse");
 assert.equal(result.usage.input, 12);
