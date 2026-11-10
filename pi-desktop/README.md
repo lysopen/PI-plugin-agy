@@ -12,9 +12,9 @@ This package ports the `PI-plugin-agy` Antigravity provider to PI-Desktop's nati
 
 ## Install and select a model
 
-Import the `lysopen.agy-0.1.2.piplug` package from PI-Desktop's Plugins page. This version fixes empty replies in 0.1.1 by forwarding text and reasoning from the ACP runtime in both streaming and non-streaming replies.
+Download [`lysopen.agy-0.1.2.piplug`](https://github.com/lysopen/PI-plugin-agy/releases/download/pi-desktop-v0.1.2/lysopen.agy-0.1.2.piplug). On PI-Desktop 0.22.0 or later, open **Plugins → ⋯ → Install Plugin Package** and select the file without unzipping it. Version 0.1.2 fixes the empty replies reported by 0.1.1. See the [Chinese quick start](../README.md#pi-desktop) for troubleshooting.
 
-If you already added the custom endpoint, keep it and select the same model after the update. For a new installation on PI-Desktop 0.22.0, turn **Antigravity ACP** off and back on once in the Plugins page after import. This registers the plugin's five models in the chat model picker.
+If you already added the custom endpoint, keep it and select the same model after the update. For a new installation on PI-Desktop 0.22.0, turn **Antigravity ACP** off and back on once in the Plugins page after import. This registers the plugin's five models in the chat model picker. Select `gemini-3.8-flash` and send a short message to try it.
 
 To connect manually, open **Settings → Models → AI Services → Add Service → Custom Endpoint**. Name it **Antigravity ACP**, use `http://127.0.0.1:17956/v1` with **OpenAI Chat Completions**, leave the API key empty, and select the models you want to save.
 
@@ -47,9 +47,13 @@ node --input-type=module -e "import('./agent-extension.mjs').then(m => console.l
 npm test
 ```
 
-Package this directory with the PI-Desktop plugin devkit after installing the reference repository's workspace dependencies:
+To package from source, check out this repository and [PI-Desktop](https://github.com/vastsa/pi-desktop) as sibling directories named `PI-plugin-agy` and `pi-desktop`. Run these commands from the PI-Desktop checkout:
 
 ```powershell
-pnpm pi-plugin check .\\pi-desktop
-pnpm pi-plugin pack .\\pi-desktop
+pnpm install
+pnpm --filter "@pi-desktop/plugin-devkit..." build
+pnpm pi-plugin check ../PI-plugin-agy/pi-desktop
+pnpm pi-plugin pack ../PI-plugin-agy/pi-desktop
 ```
+
+The package is written to `PI-plugin-agy/pi-desktop/dist/`.
