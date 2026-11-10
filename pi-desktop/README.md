@@ -4,19 +4,20 @@ This package is for PI-Desktop only. It connects the official local `agy acp` pr
 
 ## What it provides
 
-- A native PI-Desktop Provider row named **Antigravity ACP**, with five selectable models.
-- A loopback OpenAI-compatible bridge at `http://127.0.0.1:17956/v1`.
+- A loopback OpenAI-compatible bridge at `http://127.0.0.1:17956/v1` that provides five models to PI-Desktop.
 - The official local `agy acp` process over ACP v1.
 - ACP session handling, model selection, account pools, quota and failover, history replay, and MCP tool handoff.
 - Tool calls returned to PI-Desktop as normal `toolCall` blocks, so the host executes them and the next provider request resumes the parked ACP turn.
 
-## Install and select a model
+## Install, add a model service, and chat
 
-Download [`lysopen.agy-0.1.2.piplug`](https://github.com/lysopen/PI-plugin-agy/releases/download/pi-desktop-v0.1.2/lysopen.agy-0.1.2.piplug). On PI-Desktop 0.22.0 or later, open **Plugins → ⋯ → Install Plugin Package** and select the file without unzipping it. Version 0.1.2 fixes the empty replies reported by 0.1.1. See the [Chinese quick start](../README.md#pi-desktop) for troubleshooting.
+Use PI-Desktop 0.22.0 or later and sign in to the official `agy` CLI on the same computer. See also the [Chinese quick start](../README.md#pi-desktop).
 
-If you already added the custom endpoint, keep it and select the same model after the update. For a new installation on PI-Desktop 0.22.0, turn **Antigravity ACP** off and back on once in the Plugins page after import. This registers the plugin's five models in the chat model picker. Select `gemini-3.8-flash` and send a short message to try it.
+1. **Install and enable the plugin.** Download [`lysopen.agy-0.1.2.piplug`](https://github.com/lysopen/PI-plugin-agy/releases/download/pi-desktop-v0.1.2/lysopen.agy-0.1.2.piplug). Open **Plugins → ⋯ → Install Plugin Package** and select the file without unzipping it. Review the permissions and make sure **Antigravity ACP** is enabled.
+2. **Add a model service.** Open **Settings → Models → AI Services → Add Service → Custom Endpoint**. Name it **Antigravity ACP**, set the endpoint to `http://127.0.0.1:17956/v1`, choose **OpenAI Chat Completions**, and leave the API key blank. When the model list loads, select the models you want and save.
+3. **Send a message.** Return to chat, pick a saved model such as `gemini-3.8-flash`, and send a message.
 
-To connect manually, open **Settings → Models → AI Services → Add Service → Custom Endpoint**. Name it **Antigravity ACP**, use `http://127.0.0.1:17956/v1` with **OpenAI Chat Completions**, leave the API key empty, and select the models you want to save.
+When upgrading from 0.1.1, import 0.1.2 through **Install Plugin Package**. Keep your existing model service and selections.
 
 The local official CLI owns authentication. To customize the runtime, set the following environment variables before starting PI-Desktop:
 
@@ -30,7 +31,7 @@ The local official CLI owns authentication. To customize the runtime, set the fo
 | `PI_AGY_CONTEXT_WINDOW` | Declared context window; default `256000`, use `1048576` only after the local unlock is active. |
 | `PI_AGY_AUTO_PATCH` | `true`/`false`; whether to run the existing context-unlock preflight. |
 
-The fixed loopback port is `17956`. PI-Desktop reaches the bridge through the declared Provider base URL; do not change the port in only one place.
+The bridge listens on the fixed loopback port `17956`. Use that port in the custom endpoint.
 
 The plugin requires a locally installed and signed-in official `agy` CLI. Granting `agent.extension` is required because the ACP transport is a long-lived local process rather than a one-shot HTTP request.
 
