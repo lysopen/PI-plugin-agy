@@ -1,6 +1,6 @@
-# Antigravity ACP 插件
+# Antigravity ACP for PI-Desktop
 
-在 PI-Desktop 或 DeepSeek Harness（DSH）里使用本机官方 `agy acp`。两个版本独立安装，登录态仍由官方 CLI 管理。
+本版仅适用于 PI-Desktop，通过本机官方 `agy acp` 接入 Antigravity 模型。登录态由官方 CLI 管理。
 
 ## PI-Desktop
 
@@ -20,17 +20,8 @@
 
 高级设置和源码打包见 [PI-Desktop 插件说明](./pi-desktop/README.md)。协议说明见 [Agent Client Protocol](https://agentclientprotocol.com/get-started/introduction)。
 
-## DeepSeek Harness（DSH）
+## 致谢
 
-DSH 插件用本机官方 `agy acp` 注册一级模型。安装方式不变：
-
-```sh
-dsh plugin --profile web add "git+https://github.com/lili-luo/dsh-plugin-bundle.git#main&path:/dsh-llm-antigravity-acp"
-```
-
-- [DSH 插件源码与说明](./dsh-llm-antigravity-acp)
-- [可选上下文解锁脚本](./agy-context-unlock)：把官方客户端默认的 256K 上下文提高到约 1M。它会改写本机 `agy` 二进制，不随插件安装。
-
-## 社区
+感谢原 DSH 插件作者 **lili-luo**。本版移植自其开源项目 [dsh-plugin-bundle](https://github.com/lili-luo/dsh-plugin-bundle)。
 
 本项目在 [LINUX DO](https://linux.do) 社区进行开源推广，感谢社区佬友的交流、反馈与建议。

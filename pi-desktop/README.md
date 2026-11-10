@@ -1,13 +1,13 @@
 # Antigravity ACP for PI-Desktop
 
-This package ports the `PI-plugin-agy` Antigravity provider to PI-Desktop's native Provider list and trusted Agent Extension API.
+This package is for PI-Desktop only. It connects the official local `agy acp` process to PI-Desktop's native Provider list and trusted Agent Extension API.
 
 ## What it provides
 
 - A native PI-Desktop Provider row named **Antigravity ACP**, with five selectable models.
 - A loopback OpenAI-compatible bridge at `http://127.0.0.1:17956/v1`.
 - The official local `agy acp` process over ACP v1.
-- The existing ACP session, model selection, account pool, quota/failover, history replay, and MCP tool handoff logic from the DSH plugin.
+- ACP session handling, model selection, account pools, quota and failover, history replay, and MCP tool handoff.
 - Tool calls returned to PI-Desktop as normal `toolCall` blocks, so the host executes them and the next provider request resumes the parked ACP turn.
 
 ## Install and select a model
@@ -36,7 +36,7 @@ The plugin requires a locally installed and signed-in official `agy` CLI. Granti
 
 ## Source layout
 
-`runtime/` is the checked-in JavaScript build of the reusable ACP runtime from `dsh-llm-antigravity-acp/lib`, with only the DSH type/runtime imports replaced by `runtime/dsh-compat.js`. `agent-extension.mjs` adapts that runtime to the Agent Extension contract; `main.cjs` adapts it to PI-Desktop's native OpenAI-compatible Provider contract. The original DSH plugin remains untouched and is still the source of the runtime behaviour.
+`runtime/` contains the reusable ACP runtime built from `dsh-llm-antigravity-acp/lib`, with the original host imports replaced by `runtime/dsh-compat.js`. `agent-extension.mjs` adapts that runtime to the Agent Extension contract; `main.cjs` adapts it to PI-Desktop's native OpenAI-compatible Provider contract.
 
 ## Local checks
 
@@ -57,3 +57,7 @@ pnpm pi-plugin pack ../PI-plugin-agy/pi-desktop
 ```
 
 The package is written to `PI-plugin-agy/pi-desktop/dist/`.
+
+## Credits
+
+Thanks to **lili-luo**, author of the original DSH plugin: [dsh-plugin-bundle](https://github.com/lili-luo/dsh-plugin-bundle).
