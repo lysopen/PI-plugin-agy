@@ -480,12 +480,17 @@ async function loadAdapter() {
   return adapterPromise;
 }
 
-async function startBridge(log = () => {}) {
-  if (bridge) return bridge.address();
+async function ensureRuntime() {
   const adapter = await loadAdapter();
   runtime ??= adapter.createRuntime();
+  return { adapter, runtime };
+}
+
+async function startBridge(log = () => {}) {
+  if (bridge) return bridge.address();
+  const { adapter, runtime: activeRuntime } = await ensureRuntime();
   bridge = createBridgeServer({
-    runtime,
+    runtime: activeRuntime,
     models: adapter.modelsForDesktop(),
     toOptions: adapter.toDshOptions,
     complete: adapter.completeWithRuntime,
@@ -499,6 +504,21 @@ async function startBridge(log = () => {}) {
     bridge = undefined;
     throw error;
   }
+}
+
+async function onRendererCall(method, args) {
+  if (method !== "agy.quota") {
+    throw Object.assign(new Error(`unknown renderer method: ${String(method)}`), {
+      code: "AGY_UNKNOWN_RENDERER_METHOD",
+    });
+  }
+  const { adapter, runtime: activeRuntime } = await ensureRuntime();
+  const force = Boolean(args && typeof args === "object" && args.force === true);
+  return adapter.quotaForDesktop(activeRuntime, { force, timeoutMs: 1_500 });
+}
+
+function setRuntimeForTests(nextRuntime) {
+  runtime = nextRuntime;
 }
 
 async function stopBridge() {
@@ -533,6 +553,8 @@ async function onUnload() {
 module.exports = {
   onLoad,
   onUnload,
+  onRendererCall,
+  setRuntimeForTests,
   createBridgeServer,
   requestContext,
   openAiMessageToPi,

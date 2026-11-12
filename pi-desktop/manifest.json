@@ -2,12 +2,15 @@
   "schemaVersion": 1,
   "id": "lysopen.agy",
   "name": "Antigravity ACP",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Use the locally installed official agy ACP server as a PI-Desktop model provider.",
   "author": "lysopen",
   "homepage": "https://github.com/lysopen/PI-plugin-agy",
   "repository": "https://github.com/lysopen/PI-plugin-agy",
   "main": "main.cjs",
+  "renderer": "renderer/index.mjs",
+  "rendererActions": ["plugin.call"],
+  "rendererCallMethods": ["agy.quota"],
   "contributes": {
     "agentExtensions": ["agent-extension.mjs"],
     "providers": [
@@ -66,7 +69,7 @@
       { "id": "antigravity-bridge", "label": "Antigravity OpenAI bridge" }
     ]
   },
-  "permissions": ["agent.extension", "provider.register", "background.service"],
+  "permissions": ["agent.extension", "provider.register", "background.service", "renderer.extension"],
   "engines": {
     "piDesktop": ">=0.22.0"
   },

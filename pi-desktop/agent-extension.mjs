@@ -377,6 +377,138 @@ export function modelsForDesktop() {
   }));
 }
 
+function stringOrUndefined(value, max = 256) {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, max) : undefined;
+}
+
+function safeFraction(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.min(1, Math.max(0, number));
+}
+
+function safeQuotaSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") {
+    return { status: "error", error: "quota snapshot unavailable", groups: [] };
+  }
+  const groups = Array.isArray(snapshot.groups)
+    ? snapshot.groups.map((group) => ({
+        kind: stringOrUndefined(group?.kind, 32) ?? "unknown",
+        name: stringOrUndefined(group?.name, 128) ?? "Quota",
+        buckets: Array.isArray(group?.buckets)
+          ? group.buckets.map((bucket) => ({
+              id: stringOrUndefined(bucket?.id, 128) ?? "",
+              name: stringOrUndefined(bucket?.name, 128) ?? "",
+              window: stringOrUndefined(bucket?.window, 64) ?? "",
+              remainingFraction: safeFraction(bucket?.remainingFraction),
+              resetTime: stringOrUndefined(bucket?.resetTime, 128) ?? "",
+              ...(bucket?.disabled === true ? { disabled: true } : {}),
+            }))
+          : [],
+      }))
+    : [];
+  const safe = {
+    status: snapshot.status === "ok" ? "ok" : "error",
+    groups,
+    ...(stringOrUndefined(snapshot.updatedAt, 64) ? { updatedAt: snapshot.updatedAt } : {}),
+    ...(stringOrUndefined(snapshot.subscriptionTier, 32)
+      ? { subscriptionTier: snapshot.subscriptionTier }
+      : {}),
+    ...(stringOrUndefined(snapshot.subscriptionName, 128)
+      ? { subscriptionName: snapshot.subscriptionName }
+      : {}),
+  };
+  if (safe.status !== "ok") {
+    safe.error = stringOrUndefined(snapshot.error, 240) ?? "quota unavailable";
+  }
+  return safe;
+}
+
+function safeAccount(account) {
+  return {
+    id: stringOrUndefined(account?.id, 128) ?? "default",
+    label: stringOrUndefined(account?.label, 128) ?? "",
+    ...(stringOrUndefined(account?.email, 256) ? { email: account.email } : {}),
+    system: account?.system === true,
+    enabled: account?.enabled !== false,
+    state: stringOrUndefined(account?.state, 32) ?? "idle",
+    sessions: Number.isFinite(Number(account?.sessions)) ? Math.max(0, Number(account.sessions)) : 0,
+    ...(stringOrUndefined(account?.subscriptionTier, 32)
+      ? { subscriptionTier: account.subscriptionTier }
+      : {}),
+    ...(stringOrUndefined(account?.subscriptionName, 128)
+      ? { subscriptionName: account.subscriptionName }
+      : {}),
+  };
+}
+
+function timeoutResult(promise, timeoutMs) {
+  return new Promise((resolve) => {
+    let settled = false;
+    let timer;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      if (timer !== undefined) clearTimeout(timer);
+      resolve(value);
+    };
+    timer = setTimeout(() => finish({ timedOut: true }), timeoutMs);
+    Promise.resolve(promise).then(
+      (value) => finish({ value }),
+      (error) => finish({ error }),
+    );
+  });
+}
+
+/**
+ * Return the renderer-safe account and quota snapshot.
+ *
+ * Renderer calls have a two-second host budget. A slow Cloud Code request must
+ * not make the composer control unusable, so each account is bounded and a
+ * partial answer is still useful: the runtime keeps the quota cache warm and
+ * the next refresh can show the completed result.
+ */
+export async function quotaForDesktop(runtime, { force = false, timeoutMs = 1_500 } = {}) {
+  const rows = typeof runtime?.accounts === "function" ? runtime.accounts() : [];
+  const accounts = Array.isArray(rows) ? rows : [];
+  const safeTimeout = Math.min(1_800, Math.max(250, Number(timeoutMs) || 1_500));
+  const results = await Promise.all(accounts.map(async (account) => {
+    const safe = safeAccount(account);
+    let settled;
+    try {
+      settled = await timeoutResult(
+        typeof runtime?.quotaFor === "function"
+          ? runtime.quotaFor(safe.id, force)
+          : Promise.resolve({ status: "error", error: "quota reader unavailable", groups: [] }),
+        safeTimeout,
+      );
+    } catch (error) {
+      settled = { error };
+    }
+    let quota;
+    if (settled?.timedOut) {
+      quota = { status: "error", error: "quota refresh timed out", groups: [] };
+    } else if (settled?.error !== undefined) {
+      quota = {
+        status: "error",
+        error: settled.error instanceof Error ? settled.error.message : String(settled.error),
+        groups: [],
+      };
+    } else {
+      quota = settled?.value;
+    }
+    return { ...safe, quota: safeQuotaSnapshot(quota) };
+  }));
+  const hasQuotaError = results.some((account) => account.quota.status !== "ok");
+  return {
+    status: hasQuotaError ? "partial" : "ok",
+    updatedAt: new Date().toISOString(),
+    accounts: results,
+  };
+}
+
 export function createRuntime(overrides = {}) {
   return new AntigravityRuntime({
     config: overrides.config ?? runtimeConfig(),
